@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect   
-from django.http import HttpResponse
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login as auth_login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -10,9 +12,26 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 from .models import Post
-from .forms import PostForm
+from .forms import PostForm,RegisterForm
 from .filters import PostFilter
 # Create your views here.
+
+def register(request):
+    form = UserCreationForm()
+
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user= form.save()
+            auth_login(request, user)
+            return redirect("home")
+    context = {'form':form,}
+    return render(request, 'base/register.html', context)
+
+def login(request):
+    context = {
+    }
+    return render(request, 'base/login.html', context)
 
 def home(request): 
     posts = Post.objects.filter(active=True, featured=True)[0:3]
